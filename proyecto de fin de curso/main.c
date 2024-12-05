@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,14 +6,12 @@
 #define MAX_NAME_LEN 100
 #define MAX_CARRERA_LEN 50
 
-// Definición de la estructura Alumno
 typedef struct {
     char nombre[MAX_NAME_LEN];
     float promedio;
     char carrera[MAX_CARRERA_LEN];
 } Alumno;
 
-// Función para mostrar el menú
 void mostrarMenu() {
     printf("\n--- Sistema de Gestión de Alumnos ---\n");
     printf("1. Nuevo Archivo\n");
@@ -26,7 +23,6 @@ void mostrarMenu() {
     printf("Seleccione una opción: ");
 }
 
-// Función para crear un nuevo archivo
 void nuevoArchivo(const char *filename) {
     FILE *file = fopen(filename, "wb");
     if (!file) {
@@ -37,7 +33,6 @@ void nuevoArchivo(const char *filename) {
     printf("Archivo creado exitosamente: %s\n", filename);
 }
 
-// Función para abrir un archivo
 FILE *abrirArchivo(const char *filename, const char *mode) {
     FILE *file = fopen(filename, mode);
     if (!file) {
@@ -46,7 +41,6 @@ FILE *abrirArchivo(const char *filename, const char *mode) {
     return file;
 }
 
-// Función para guardar registros en un archivo
 void guardarArchivo(const char *filename, Alumno *alumnos, int cantidad) {
     FILE *file = fopen(filename, "wb");
     if (!file) {
@@ -58,7 +52,6 @@ void guardarArchivo(const char *filename, Alumno *alumnos, int cantidad) {
     printf("Registros guardados exitosamente en %s.\n", filename);
 }
 
-// Función para agregar un nuevo alumno
 void agregarAlumno(FILE *file) {
     Alumno nuevo;
     printf("Ingrese el nombre del alumno: ");
@@ -73,7 +66,6 @@ void agregarAlumno(FILE *file) {
     printf("Alumno agregado exitosamente.\n");
 }
 
-// Función para buscar un alumno por nombre
 void buscarAlumno(FILE *file) {
     char nombreBusqueda[MAX_NAME_LEN];
     Alumno alumno;
@@ -100,7 +92,7 @@ void buscarAlumno(FILE *file) {
 }
 
 int main() {
-    setlocale(LC_ALL, ""); // Configurar soporte para caracteres especiales
+    setlocale(LC_ALL, "");
     char filename[MAX_NAME_LEN] = "";
     FILE *archivo = NULL;
     int opcion;
@@ -110,13 +102,13 @@ int main() {
         scanf("%d", &opcion);
 
         switch (opcion) {
-            case 1: // Nuevo Archivo
+            case 1:
                 printf("Ingrese el nombre del nuevo archivo: ");
                 scanf(" %[^\n]", filename);
                 nuevoArchivo(filename);
                 break;
 
-            case 2: // Abrir Archivo
+            case 2:
                 printf("Ingrese el nombre del archivo a abrir: ");
                 scanf(" %[^\n]", filename);
                 archivo = abrirArchivo(filename, "rb+");
@@ -125,7 +117,7 @@ int main() {
                 }
                 break;
 
-            case 3: // Guardar Archivo
+            case 3:
                 if (archivo) {
                     fclose(archivo);
                     archivo = abrirArchivo(filename, "rb+");
@@ -135,7 +127,7 @@ int main() {
                 }
                 break;
 
-            case 4: // Buscar y Seleccionar
+            case 4:
                 if (archivo) {
                     buscarAlumno(archivo);
                 } else {
@@ -143,7 +135,7 @@ int main() {
                 }
                 break;
 
-            case 5: // Agregar Nuevo Alumno
+            case 5:
                 if (archivo) {
                     agregarAlumno(archivo);
                 } else {
@@ -151,7 +143,7 @@ int main() {
                 }
                 break;
 
-            case 6: // Salir
+            case 6:
                 if (archivo) fclose(archivo);
                 printf("Saliendo del programa.\n");
                 break;
