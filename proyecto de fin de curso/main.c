@@ -1,158 +1,167 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <locale.h>
 
-#define MAX_NAME_LEN 100
-#define MAX_CARRERA_LEN 50
+#define MAX_NOMBRE 100
+#define MAX_CARRERA 50
 
 typedef struct {
-    char nombre[MAX_NAME_LEN];
+    char nombre[MAX_NOMBRE];
     float promedio;
-    char carrera[MAX_CARRERA_LEN];
+    char carrera[MAX_CARRERA];
 } Alumno;
 
-void mostrarMenu() {
-    printf("\n--- Sistema de Gestión de Alumnos ---\n");
-    printf("1. Nuevo Archivo\n");
-    printf("2. Abrir Archivo por Nombre\n");
-    printf("3. Guardar Archivo con Nombre\n");
-    printf("4. Buscar y Seleccionar Renglón\n");
-    printf("5. Agregar Nuevo Alumno\n");
-    printf("6. Salir\n");
-    printf("Seleccione una opción: ");
+// Funcion para limpiar el bufer de entrada
+void limpiar_buffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
 }
 
-void nuevoArchivo(const char *filename) {
-    FILE *file = fopen(filename, "wb");
-    if (!file) {
-        perror("Error al crear el archivo");
-        return;
-    }
-    fclose(file);
-    printf("Archivo creado exitosamente: %s\n", filename);
-}
-
-FILE *abrirArchivo(const char *filename, const char *mode) {
-    FILE *file = fopen(filename, mode);
-    if (!file) {
-        printf("El archivo \"%s\" no existe.\n", filename);
-    }
-    return file;
-}
-
-void guardarArchivo(const char *filename, Alumno *alumnos, int cantidad) {
-    FILE *file = fopen(filename, "wb");
-    if (!file) {
-        perror("Error al guardar el archivo");
-        return;
-    }
-    fwrite(alumnos, sizeof(Alumno), cantidad, file);
-    fclose(file);
-    printf("Registros guardados exitosamente en %s.\n", filename);
-}
-
-void agregarAlumno(FILE *file) {
-    Alumno nuevo;
-    printf("Ingrese el nombre del alumno: ");
-    scanf(" %[^\n]", nuevo.nombre);
-    printf("Ingrese el promedio: ");
-    scanf("%f", &nuevo.promedio);
-    printf("Ingrese la carrera: ");
-    scanf(" %[^\n]", nuevo.carrera);
-
-    fseek(file, 0, SEEK_END);
-    fwrite(&nuevo, sizeof(Alumno), 1, file);
-    printf("Alumno agregado exitosamente.\n");
-}
-
-void buscarAlumno(FILE *file) {
-    char nombreBusqueda[MAX_NAME_LEN];
+// Funcion para agregar un alumno y escribirlo en un archivo
+void agregar_alumno_a_archivo(const char *nombre_archivo) {
     Alumno alumno;
-    int encontrado = 0;
 
-    printf("Ingrese el nombre a buscar: ");
-    scanf(" %[^\n]", nombreBusqueda);
+    printf("Ingrese el nombre del alumno: ");
+    limpiar_buffer();
+    fgets(alumno.nombre, MAX_NOMBRE, stdin);
+    alumno.nombre[strcspn(alumno.nombre, "\n")] = '\0';
 
-    rewind(file);
-    int index = 0;
-    while (fread(&alumno, sizeof(Alumno), 1, file)) {
-        if (strcmp(alumno.nombre, nombreBusqueda) == 0) {
-            printf("Alumno encontrado en el renglón %d:\n", index + 1);
-            printf("Nombre: %s, Promedio: %.2f, Carrera: %s\n",
-                   alumno.nombre, alumno.promedio, alumno.carrera);
-            encontrado = 1;
-            break;
-        }
-        index++;
+    printf("Ingrese el promedio del alumno: ");
+    scanf("%f", &alumno.promedio);
+
+    printf("Ingrese la carrera del alumno: ");
+    limpiar_buffer();
+    fgets(alumno.carrera, MAX_CARRERA, stdin);
+    alumno.carrera[strcspn(alumno.carrera, "\n")] = '\0';
+
+    FILE *archivo = fopen(nombre_archivo, "a");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo para escribir.\n");
+        return;
     }
-    if (!encontrado) {
-        printf("No se encontró un alumno con el nombre especificado.\n");
+
+    fprintf(archivo, "%s,%.2f,%s\n", alumno.nombre, alumno.promedio, alumno.carrera);
+    fclose(archivo);
+
+    printf("Alumno agregado al archivo '%s' con exito.\n", nombre_archivo);
+}
+
+// Funcion para mostrar los contenidos del archivo
+void mostrar_archivo(const char *nombre_archivo) {
+    FILE *archivo = fopen(nombre_archivo, "r");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo para lectura.\n");
+        return;
     }
+
+    char linea[200];
+    printf("\nContenido del archivo '%s':\n", nombre_archivo);
+    while (fgets(linea, sizeof(linea), archivo)) {
+        printf("%s", linea);
+    }
+    fclose(archivo);
+}
+
+// Funcion para mostrar el menu principal
+void mostrar_menu_principal() {
+    printf("\nMENU PRINCIPAL:\n");
+    printf("1. Crear un nuevo archivo\n");
+    printf("2. Abrir archivo existente\n");
+    printf("3. Salir\n");
+    printf("Seleccione una opcion: ");
+}
+
+// Funcion para mostrar el menu de archivo
+void mostrar_menu_archivo() {
+    printf("\nMENU DE ARCHIVO:\n");
+    printf("1. Ver los datos guardados\n");
+    printf("2. Agregar un alumno\n");
+    printf("3. Volver al menu principal\n");
+    printf("Seleccione una opcion: ");
 }
 
 int main() {
-    setlocale(LC_ALL, "");
-    char filename[MAX_NAME_LEN] = "";
-    FILE *archivo = NULL;
-    int opcion;
+    int opcion, opcion_archivo;
+    char nombre_archivo[100];
+    FILE *archivo;
 
-    do {
-        mostrarMenu();
+    while (1) {
+        mostrar_menu_principal();
         scanf("%d", &opcion);
 
         switch (opcion) {
             case 1:
-                printf("Ingrese el nombre del nuevo archivo: ");
-                scanf(" %[^\n]", filename);
-                nuevoArchivo(filename);
+                // funcion para crear un nuevo archivo
+                printf("Ingrese el nombre del archivo a crear (incluya la extension .txt): ");
+                limpiar_buffer();
+                fgets(nombre_archivo, sizeof(nombre_archivo), stdin);
+                nombre_archivo[strcspn(nombre_archivo, "\n")] = '\0';
+
+                archivo = fopen(nombre_archivo, "w");
+                if (archivo == NULL) {
+                    printf("Error al crear el archivo.\n");
+                } else {
+                    printf("Archivo '%s' creado con exito.\n", nombre_archivo);
+                    fclose(archivo);
+                }
                 break;
 
             case 2:
-                printf("Ingrese el nombre del archivo a abrir: ");
-                scanf(" %[^\n]", filename);
-                archivo = abrirArchivo(filename, "rb+");
-                if (archivo) {
-                    printf("Archivo abierto exitosamente: %s\n", filename);
+                // Abrir un archivo existente
+                printf("Ingrese el nombre del archivo a abrir (incluya la extension .txt): ");
+                limpiar_buffer();
+                fgets(nombre_archivo, sizeof(nombre_archivo), stdin);
+                nombre_archivo[strcspn(nombre_archivo, "\n")] = '\0';
+
+                archivo = fopen(nombre_archivo, "r");
+                if (archivo == NULL) {
+                    printf("Error al abrir el archivo.\n");
+                    break;
+                }
+
+                fclose(archivo);
+
+                // funcion para mostrar menu de archivo
+                while (1) {
+                    mostrar_menu_archivo();
+                    scanf("%d", &opcion_archivo);
+
+                    switch (opcion_archivo) {
+                        case 1:
+                            // Ver los datos guardados
+                            mostrar_archivo(nombre_archivo);
+                            break;
+
+                        case 2:
+                            // Agregar un alumno
+                            agregar_alumno_a_archivo(nombre_archivo);
+                            break;
+
+                        case 3:
+                            // Volver al menu principal
+                            printf("Volviendo al menu principal...\n");
+                            break;
+
+                        default:
+                            printf("Opcion no valida. Intente de nuevo.\n");
+                    }
+
+                    if (opcion_archivo == 3) {
+                        break;
+                    }
                 }
                 break;
 
             case 3:
-                if (archivo) {
-                    fclose(archivo);
-                    archivo = abrirArchivo(filename, "rb+");
-                    printf("Archivo guardado exitosamente: %s\n", filename);
-                } else {
-                    printf("No hay archivo abierto para guardar.\n");
-                }
-                break;
-
-            case 4:
-                if (archivo) {
-                    buscarAlumno(archivo);
-                } else {
-                    printf("No hay archivo abierto.\n");
-                }
-                break;
-
-            case 5:
-                if (archivo) {
-                    agregarAlumno(archivo);
-                } else {
-                    printf("No hay archivo abierto.\n");
-                }
-                break;
-
-            case 6:
-                if (archivo) fclose(archivo);
+                // Salir del programa
                 printf("Saliendo del programa.\n");
-                break;
+                return 0;
 
             default:
-                printf("Opción no válida. Intente de nuevo.\n");
-                break;
+                printf("Opcion no valida. Intente de nuevo.\n");
         }
-    } while (opcion != 6);
+    }
 
     return 0;
 }
+

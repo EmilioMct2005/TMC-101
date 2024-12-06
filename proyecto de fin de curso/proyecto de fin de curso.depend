@@ -1,7 +1,6 @@
 # depslib dependency file v1.0
-1733167696 source:c:\users\admin\onedrive\escritorio\tmc-2024\proyecto de fin de curso\main.c
+1733438666 source:c:\users\admin\onedrive\escritorio\tmc-2024\proyecto de fin de curso\main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
-	<locale.h>
 
